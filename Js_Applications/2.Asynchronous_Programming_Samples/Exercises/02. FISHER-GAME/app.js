@@ -8,9 +8,9 @@
         loadAllUrl: `https://fisher-game.firebaseio.com/catches.json`,
 
     }
-    //for hiding the table, which we use to copy all the rest
+    
     constants.catches.style.display = `none`;
-    //mistake: forgot to use constants
+    
     constants.loadBtn.addEventListener(`click`, loadAllCatches);
     constants.addBtn.addEventListener(`click`, addNewCatch)
 
@@ -75,7 +75,7 @@
             .catch(err => console.log(err));
     }
 
-    //ready
+    
     function listCurrentCatch(identifier, catchObj) {
 
         const copyNode = constants.sampleCatch.cloneNode(true);
@@ -131,7 +131,7 @@
             .then(constants.loadBtn.click)
             .catch(err => console.log(err));
     }
-    //done => was fast
+    
     function deleteCatch(e) {
         const parent = e.target.parentNode;
         const catchId = parent.getAttribute(`data-identifier`);
@@ -151,7 +151,6 @@
 
         const status = response.status
 
-        //note: => here, i`m typing bad request!
         if (status >= 400) {
             throw new Error(`Error: ${response.statusText}`);
 
