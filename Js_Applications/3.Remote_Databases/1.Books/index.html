@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,12 +8,23 @@
     <title>Books</title>
     <link rel="stylesheet" href="./styles.css">
 </head>
+
 <body>
     <button id="loadBooks">LOAD ALL BOOKS</button>
-    
+
     <table>
-        <thead>        
-            <tr display="none" id="sample">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Isbn</th>
+                <th>Action</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+            <!-- <tr>
                 <td>Game of Thrones</td>
                 <td>George R. R. Martin</td>
                 <td>9780553386790</td>
@@ -20,18 +32,7 @@
                     <button>Edit</button>
                     <button>Delete</button>
                 </td>
-            </tr>
-            <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Isbn</th>
-                <th>Action</th>
-            </tr>
-            
-        </thead>
-        
-        <tbody>
-            
+            </tr> -->
         </tbody>
     </table>
 
@@ -45,8 +46,10 @@
         <input type="title" id="isbn" placeholder="Isnb..." value="">
         <button>Submit</button>
     </form>
+
     <script src="./app.js"></script>
 </body>
+
 </html>
 
 <!--Feel free to change/update/modify the HTML Structure-->

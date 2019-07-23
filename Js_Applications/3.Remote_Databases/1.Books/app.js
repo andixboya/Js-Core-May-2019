@@ -8,6 +8,10 @@ let constants = {
     loadBooksBtn: document.querySelector(`#loadBooks`),
     tableBody: document.querySelector(`tbody`),
 
+    submitForm: document.querySelector(`form`),
+    body: document.querySelector(`body`),
+
+
 
     baseUrl: `https:/baas.kinvey.com`,
 
@@ -18,7 +22,6 @@ let constants = {
     password: `gosho`
 }
 
-
 constants.submitBtn.addEventListener(`click`, createBook);
 console.log(constants.submitBtn);
 constants.loadBooksBtn.addEventListener(`click`, loadAllBooks);
@@ -26,8 +29,6 @@ constants.loadBooksBtn.addEventListener(`click`, loadAllBooks);
 async function createBook(e) {
 
     e.preventDefault();
-
-
     const isbn = constants.isbnInput.value;
     const author = constants.authorInput.value;
     const title = constants.titleInput.value;
@@ -38,8 +39,8 @@ async function createBook(e) {
         isbn
     }
 
-    // debugger
     const createUrl = constants.baseUrl + "/" + "appdata" + "/" + constants.appId + "/" + "Books";
+
     try {
         const res = await fetch(createUrl, {
             method: "POST",
@@ -66,7 +67,6 @@ async function createBook(e) {
 async function loadAllBooks() {
 
     const getAllUrl = constants.baseUrl + "/appdata/" + constants.appId + "/Books";
-    console.log(getAllUrl);
     constants.tableBody.innerHTML = "";
 
     const res = await fetch(getAllUrl, {
@@ -79,8 +79,10 @@ async function loadAllBooks() {
     })
     const books = await res.json();
 
+    // debugger;
     books.forEach(bookInfo => {
         const newBook = createNode(bookInfo);
+        console.log(newBook);
         constants.tableBody.appendChild(newBook);
     })
 
@@ -94,39 +96,41 @@ async function loadAllBooks() {
     // })
 }
 
-function createNode(bookInfo) {
+function editBook(e) {
+    const nodeInfo = e.target.parentNode.parentNode;
+    console.log(nodeInfo);
+    const [titleTd, authorTd, isbnTd] = Array.from(nodeInfo.children);
+    const bookId = nodeInfo.getAttribute(`data-id`);
 
-    const { _id, title, author, isbn } = bookInfo;
+    const newForm = document.createElement(`form`);
+    newForm.setAttribute(`data-id`, bookId);
+    newForm.innerHTML = `<h3>EDIT BOOK</h3>
+    <label>TITLE</label>
+    <input type="title" id="title" value="${titleTd.textContent}">
+    <label>AUTHOR</label>
+    <input type="title" id="author" value="${authorTd.textContent}">
+    <label>ISBN</label>
+    <input type="title" id="isbn" value="${isbnTd.textContent}">
+    <button>Done</button>
+    <button>Cancel</button>`;
+    const [doneBtn, cancelBtn] = Array.from(newForm.querySelectorAll(`button`));
+    doneBtn.addEventListener(`click`, confirmEdit)
+    cancelBtn.addEventListener(`click`, cancelEdit);
 
-    const sampleNode = document.querySelector(`thead tr`);
+    let body = document.querySelector(`body`);
 
-    const cloneNode = sampleNode.cloneNode(true);
+    const formToRemove = document.querySelector(`form`);
+    body.removeChild(formToRemove);
+    body.appendChild(newForm);
 
-    let [titleTd, authorTd, IsbnTd, tdBtns] = cloneNode.children;
-
-    titleTd.textContent = title;
-    authorTd.textContent = author;
-    IsbnTd.textContent = isbn;
-
-    //this is for the identifier
-    cloneNode.setAttribute(`data-id`, _id);
-
-    const [editBtn, deleteBtn] = tdBtns.children;
-
-    editBtn.addEventListener(`click`, editBook);
-    deleteBtn.addEventListener(`click`, deleteBook);
-
-    cloneNode.setAttribute("display", "block");
-
-    cloneNode.removeAttribute(`id`);
-    return cloneNode;
 }
+
 async function deleteBook(e) {
     const node = e.target.parentNode.parentNode;
     const bookId = node.getAttribute(`data-id`);
     node.remove();
-    console.log(bookId);
-    console.log(node);
+    // console.log(bookId);
+    // console.log(node);
 
     const deleteUrl = constants.baseUrl + "/" + "appdata" + "/" + constants.appId + "/" + "Books/" + bookId;
     const res = await fetch(deleteUrl,
@@ -134,7 +138,6 @@ async function deleteBook(e) {
             method: "DELETE",
             credentials: "include",
             'Authorization': `Basic ${btoa(constants.user + ':' + constants.password)}`,
-            //a must! otherwise it won`t know the content
             headers: {
                 "Content-type": "application/json"
             }
@@ -143,9 +146,89 @@ async function deleteBook(e) {
     console.log(await res.json());
 }
 
-function editBook() {
-//TODO:
-    debugger;
+
+
+function createNode(bookInfo) {
+
+    const { _id, title, author, isbn } = bookInfo;
+
+    const newNode = document.createElement(`tr`);
+    newNode.innerHTML = `<tr>
+    <td>${title}</td>
+    <td>${author}</td>
+    <td>${isbn}</td>
+    <td>
+        <button>Edit</button>
+        <button>Delete</button>
+    </td>`;
+    //this is for the identifier
+    newNode.setAttribute(`data-id`,_id);
+    
+    const [editBtn,deleteBtn]=Array.from(newNode.querySelectorAll(`button`));
+    editBtn.addEventListener(`click`, editBook);
+    deleteBtn.addEventListener(`click`, deleteBook);
+    return newNode;
+}
+async function confirmEdit(e) {
+    e.preventDefault();
+    const target = e.target.parentNode;
+    const bookId = target.getAttribute(`data-id`);
+    // console.log(bookId);
+    console.log(target);
+    // debugger;
+    const [titleInput, authorInput, isbnInput] = Array.from(target.querySelectorAll(`input`));
+
+    const data = {
+        title: titleInput.value,
+        author: authorInput.value,
+        isbn: isbnInput.value
+    }
+    console.log(data);
+    // debugger;
+
+    target.remove();
+    appendSubmitForm();
+
+    // debugger;
+    const editUrl = constants.baseUrl + "/" + "appdata" + "/" + constants.appId + "/" + `Books/${bookId}`;
+
+
+    console.log(bookId);
+    console.log(editUrl);
+
+    const res = await fetch(editUrl, {
+        method: "PUT",
+        Authorization: `Basic ${btoa(constants.user + ':' + constants.password)}`,
+        credentials: "include",
+        headers: {
+            "Content-type": "application/json"
+        },
+        body: JSON.stringify(data)
+    })
+
+    loadAllBooks();
+
+}
+function cancelEdit(e) {
+    e.preventDefault();
+    const formToRemove = e.target.parentNode;
+    console.log(formToRemove);
+    formToRemove.remove();
+
+    appendSubmitForm();
+}
+
+function appendSubmitForm() {
+    const newForm = document.createElement(`form`);
+    newForm.innerHTML = `<h3>FORM</h3>
+    <label>TITLE</label>
+    <input type="title" id="title" placeholder="Title...">
+    <label>AUTHOR</label>
+    <input type="title" id="author" placeholder="Author...">
+    <label>ISBN</label>
+    <input type="title" id="isbn" placeholder="Isnb...">
+    <button>Submit</button>`;
+    document.querySelector(`body`).appendChild(newForm);
 }
 
 function clearFields() {
@@ -153,3 +236,5 @@ function clearFields() {
     constants.authorInput.value = "";
     constants.titleInput.value = "";
 }
+
+
